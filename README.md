@@ -1,7 +1,4 @@
 # back_agendamentos_aula
-
-Claro! Aqui está um exemplo de **descrição para o repositório do GitHub** do seu projeto de agendamento de salas, incluindo as tecnologias utilizadas e funcionalidades previstas:
-
 ---
 
 ## 🗓️ Agenda de Salas — Backend
