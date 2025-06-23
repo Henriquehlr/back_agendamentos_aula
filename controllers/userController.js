@@ -1,15 +1,11 @@
 const axios = require('axios');
-const User = require('../models/User');
-
+const { User } = require('../models');
+ 
 module.exports = {
-  // Criar novo usuário
-  async create(req, res) {
-    try {
-      const {
-        name, email, password,
-        cep, number, complement
-      } = req.body;
+  async createUser(req, res) {
 
+    try {
+      const { name, email, password, cep, number, complement } = req.body;
       // Buscar dados do CEP
       const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
 
@@ -32,7 +28,7 @@ module.exports = {
         complement
       });
 
-      // Opcional: remover senha do retorno
+      // Remover senha do retorno
       const { password: _, ...userData } = user.toJSON();
 
       return res.status(201).json(userData);
@@ -43,12 +39,11 @@ module.exports = {
   },
 
   // Listar todos os usuários
-  async index(req, res) {
+  async listUser(req, res) {
     try {
       const users = await User.findAll({
-        attributes: { exclude: ['password'] } // não retornar senha
+        attributes: { exclude: ['password'] }
       });
-
       return res.json(users);
     } catch (err) {
       console.error(err);

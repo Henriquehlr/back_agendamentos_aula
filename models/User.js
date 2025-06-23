@@ -1,60 +1,61 @@
 const { DataTypes } = require('sequelize');
-const bcrypt = require('bcrypt');
-const sequelize = require('../config/database');
+const bcrypt = require('bcryptjs');
 
-const User = sequelize.define('User', {
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-    validate: {
-      isEmail: true
+module.exports = (sequelize) => {
+  const User = sequelize.define('User', {
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      validate: {
+        isEmail: true
+      }
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    cep: {
+      type: DataTypes.STRING(9),
+      allowNull: false
+    },
+    state: {
+      type: DataTypes.STRING(2),
+      allowNull: false
+    },
+    city: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    district: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    street: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    number: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    complement: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
-  },
-  password: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  cep: {
-    type: DataTypes.STRING(9),
-    allowNull: false
-  },
-  state: {
-    type: DataTypes.STRING(2),
-    allowNull: false
-  },
-  city: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  district: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  street: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  number: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  complement: {
-    type: DataTypes.STRING,
-    allowNull: true
-  }
-}, {
-  tableName: 'users',
-  hooks: {
-    beforeCreate: async (user) => {
-      const salt = await bcrypt.genSalt(10);
-      user.password = await bcrypt.hash(user.password, salt);
+  }, {
+    tableName: 'users',
+    hooks: {
+      beforeCreate: async (user) => {
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(user.password, salt);
+      }
     }
-  }
-});
+  });
 
-module.exports = User;
+  return User;
+};
