@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const sequelize = require('./config/database');
 const userRoutes = require('./routes/userRoutes');
@@ -6,6 +7,11 @@ const authRoutes = require('./routes/authRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 
 require('dotenv').config();
+
+app.use(cors({
+  origin: 'http://localhost:3001',
+  credentials: true // se usar cookies ou headers personalizados
+}));
 
 app.use(express.json());
 
