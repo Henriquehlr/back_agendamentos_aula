@@ -41,7 +41,7 @@ API RESTful desenvolvida em **Node.js** com **Express**, utilizando **Sequelize*
 * Listar agendamentos por sala, usuário ou data
 * Cancelar ou deletar um agendamento
 
-#### Autenticação (futuramente)
+#### Autenticação 
 
 * Login com e-mail e senha
 * Middleware de autenticação usando JWT (planejado)
