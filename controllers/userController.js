@@ -49,5 +49,22 @@ module.exports = {
       console.error(err);
       return res.status(500).json({ error: 'Erro ao listar usuários' });
     }
+  },
+
+  async getProfile(req, res) {
+    try {
+      const user = await User.findByPk(req.userId, {
+        attributes: { exclude: ['password'] }
+      });
+
+      if (!user) {
+        return res.status(404).json({ error: 'Usuário não encontrado' });
+      }
+
+      return res.json(user);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Erro ao buscar perfil' });
+    }
   }
 };

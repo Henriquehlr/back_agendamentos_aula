@@ -3,6 +3,7 @@ const app = express();
 const sequelize = require('./config/database');
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes'); 
+const bookingRoutes = require('./routes/bookingRoutes');
 
 require('dotenv').config();
 
@@ -10,7 +11,8 @@ app.use(express.json());
 
 // Rotas
 app.use('/users', userRoutes);
-app.use('/', authRoutes); 
+app.use('/auth', authRoutes); 
+app.use('/bookings', bookingRoutes);
 
 // Conexão e sincronização com banco
 sequelize.authenticate()
