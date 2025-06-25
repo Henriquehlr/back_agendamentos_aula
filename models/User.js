@@ -1,68 +1,99 @@
-const { DataTypes } = require('sequelize'); // Importa os tipos de dados do Sequelize
-const bcrypt = require('bcryptjs'); // Importa a biblioteca bcrypt para hash de senhas
+const { DataTypes } = require('sequelize'); // Tipos do Sequelize (string, boolean, json, etc.)
+const bcrypt = require('bcryptjs'); // Lib para hash seguro de senhas
 
 module.exports = (sequelize) => {
-  // Define o modelo User, que representa a tabela 'users' no banco de dados
+  // Define o modelo 'User' (tabela 'users' no banco de dados)
   const User = sequelize.define('User', {
+    // Nome do usuário
     name: {
-      type: DataTypes.STRING,   // Tipo string para o nome
-      allowNull: false          // Campo obrigatório (não pode ser nulo)
+      type: DataTypes.STRING,
+      allowNull: false
     },
+    // Email único e obrigatório
     email: {
-      type: DataTypes.STRING,   // Tipo string para o email
-      allowNull: false,         // Campo obrigatório
-      unique: true,             // Deve ser único no banco de dados
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
       validate: {
-        isEmail: true           // Validação para garantir formato de email válido
+        isEmail: true // Verifica formato de email válido
       }
     },
+    // Senha (será armazenada com hash)
     password: {
-      type: DataTypes.STRING,   // Tipo string para a senha (hash armazenado)
-      allowNull: false          // Campo obrigatório
+      type: DataTypes.STRING,
+      allowNull: false
     },
+    // Endereço: CEP, estado, cidade, bairro, rua, número e complemento
     cep: {
-      type: DataTypes.STRING(9), // Tipo string com tamanho máximo 9 (CEP brasileiro)
-      allowNull: false           // Campo obrigatório
+      type: DataTypes.STRING(9),
+      allowNull: false
     },
     state: {
-      type: DataTypes.STRING(2), // Tipo string de tamanho 2 (UF do estado)
-      allowNull: false           // Campo obrigatório
+      type: DataTypes.STRING(2),
+      allowNull: false
     },
     city: {
-      type: DataTypes.STRING,    // Tipo string para cidade
-      allowNull: false           // Campo obrigatório
+      type: DataTypes.STRING,
+      allowNull: false
     },
     district: {
-      type: DataTypes.STRING,    // Tipo string para bairro/distrito
-      allowNull: false           // Campo obrigatório
+      type: DataTypes.STRING,
+      allowNull: false
     },
     street: {
-      type: DataTypes.STRING,    // Tipo string para rua
-      allowNull: false           // Campo obrigatório
+      type: DataTypes.STRING,
+      allowNull: false
     },
     number: {
-      type: DataTypes.STRING,    // Tipo string para número (pode incluir letras, ex: 123A)
-      allowNull: false           // Campo obrigatório
+      type: DataTypes.STRING,
+      allowNull: false
     },
     complement: {
-      type: DataTypes.STRING,    // Tipo string para complemento (opcional)
-      allowNull: true            // Campo opcional
+      type: DataTypes.STRING,
+      allowNull: true // Campo opcional
     },
+    // Papel do usuário (cliente ou admin)
     role: {
-      type: DataTypes.ENUM('client', 'admin'), // Define valores permitidos para o papel do usuário
-      allowNull: false,          // Campo obrigatório
-      defaultValue: 'client'     // Valor padrão é 'client'
+      type: DataTypes.ENUM('client', 'admin'),
+      allowNull: false,
+      defaultValue: 'client'
+    },
+    // Permissões do usuário (Agendamentos, Logs)
+    permissions: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      defaultValue: ['Agendamentos'], // Permissão padrão
+      validate: {
+        // Valida que todas permissões são válidas
+        isValidPermissions(value) {
+          const valid = ['Agendamentos', 'Logs'];
+          if (!Array.isArray(value)) {
+            throw new Error('Permissões devem ser uma lista.');
+          }
+          for (const perm of value) {
+            if (!valid.includes(perm)) {
+              throw new Error(`Permissão inválida: ${perm}`);
+            }
+          }
+        }
+      }
+    },
+    // Status ativo/inativo do usuário
+    status: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true
     }
   }, {
-    tableName: 'users',          // Nome explícito da tabela no banco
+    tableName: 'users',
     hooks: {
-      // Hook que executa antes de criar um novo usuário no banco
+      // Antes de criar o usuário, faz o hash da senha
       beforeCreate: async (user) => {
-        const salt = await bcrypt.genSalt(10);          // Gera um salt para o hash da senha
-        user.password = await bcrypt.hash(user.password, salt); // Substitui a senha pelo hash seguro
+        const salt = await bcrypt.genSalt(10); // Gera salt aleatório
+        user.password = await bcrypt.hash(user.password, salt); // Aplica hash
       }
     }
   });
 
-  return User; // Retorna o modelo User para uso externo
+  return User; // Exporta o modelo para ser usado no app
 };
