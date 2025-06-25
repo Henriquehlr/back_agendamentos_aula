@@ -1,20 +1,32 @@
 const axios = require('axios');
 const { User } = require('../models');
- 
-module.exports = {
-  async createUser(req, res) {
 
+module.exports = {
+  // Criação de usuário
+  async createUser(req, res) {
     try {
-      const { name, email, password, cep, number, complement } = req.body;
-      // Buscar dados do CEP
+      const {
+        name,
+        email,
+        password,
+        cep,
+        number,
+        complement,
+        permissions, // novo campo: permissões do usuário (array)
+        status       // novo campo: status ativo/inativo (boolean)
+      } = req.body;
+
+      // Consulta o endereço via API do ViaCEP
       const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
 
       if (response.data.erro) {
         return res.status(400).json({ error: 'CEP inválido' });
       }
 
+      // Desestruturação dos dados retornados pelo ViaCEP
       const { uf, localidade, bairro, logradouro } = response.data;
 
+      // Criação do usuário no banco
       const user = await User.create({
         name,
         email,
@@ -25,10 +37,12 @@ module.exports = {
         district: bairro,
         street: logradouro,
         number,
-        complement
+        complement,
+        permissions, // salva as permissões
+        status       // salva o status
       });
 
-      // Remover senha do retorno
+      // Remove o campo "password" da resposta
       const { password: _, ...userData } = user.toJSON();
 
       return res.status(201).json(userData);
@@ -42,7 +56,7 @@ module.exports = {
   async listUser(req, res) {
     try {
       const users = await User.findAll({
-        attributes: { exclude: ['password'] }
+        attributes: { exclude: ['password'] } // exclui a senha da resposta
       });
       return res.json(users);
     } catch (err) {
@@ -51,6 +65,7 @@ module.exports = {
     }
   },
 
+  // Retornar o perfil do usuário autenticado
   async getProfile(req, res) {
     try {
       const user = await User.findByPk(req.userId, {
