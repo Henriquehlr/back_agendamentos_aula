@@ -1,21 +1,27 @@
-const jwt = require('jsonwebtoken'); 
-require('dotenv').config(); 
+const jwt = require('jsonwebtoken');
+const { User } = require('../models');
 
-const secret = process.env.JWT_SECRET; 
+module.exports = async function (req, res, next) {
+  const authHeader = req.headers.authorization;
 
-module.exports = (req, res, next) => {
-  const authHeader = req.headers.authorization; 
-  
-  const token = authHeader && authHeader.split(' ')[1]; 
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Token não fornecido" });
+  }
 
-  if (!token) return res.status(401).json({ message: 'Token não fornecido' });
+  const token = authHeader.split(" ")[1];
 
-  jwt.verify(token, secret, (err, decoded) => {
-    
-    if (err) return res.status(403).json({ message: 'Token inválido' });
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); 
 
-    req.user = { id: decoded.id, role: decoded.role };
-    
-    next(); 
-  });
+    const user = await User.findByPk(decoded.id);
+
+    if (!user) {
+      return res.status(401).json({ error: "Usuário não encontrado" });
+    }
+
+    req.user = user;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: "Token inválido" });
+  }
 };

@@ -62,7 +62,8 @@ module.exports = {
       await registerLog({
         name: user.name,
         activityType: "Login",
-        module: "Autenticação"
+        module: "Autenticação",
+        userId: user.id,
       });
 
       res.json({ token });

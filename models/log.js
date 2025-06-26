@@ -15,8 +15,16 @@ module.exports = (sequelize, DataTypes) => {
     datetime: {
       type: DataTypes.DATE,
       allowNull: false
-    }
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
   });
+
+   Log.associate = (models) => {
+    Log.belongsTo(models.User, { foreignKey: 'userId' });
+  };
 
   return Log;
 };

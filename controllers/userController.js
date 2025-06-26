@@ -44,7 +44,8 @@ module.exports = {
       await registerLog({
         name,
         activityType: "Cadastro de usuário",
-        module: "Admin - Clientes"
+        module: "Admin - Clientes",
+        userId: user.id,
       });
 
       return res.status(201).json(userData);
@@ -53,6 +54,54 @@ module.exports = {
       return res.status(500).json({ error: 'Erro ao criar usuário' });
     }
   },
+
+  async updateUser(req, res){
+  try {
+    const user = req.user;
+
+    if (!user) {
+      return res.status(401).json({ message: "Usuário não autenticado." });
+    }
+
+    const {
+      name,
+      email,
+      password,
+      cep,
+      state,
+      city,
+      district,
+      street,
+      number,
+      complement,
+      permissions
+    } = req.body;
+
+    await user.update({
+      name,
+      email,
+      password,
+      cep,
+      state,
+      city,
+      district,
+      street,
+      number,
+      complement,
+      permissions
+    });
+
+    const { password: _, ...userData } = user.toJSON();
+
+    return res.status(200).json({
+      message: "Dados atualizados com sucesso.",
+      user: userData,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Erro ao atualizar usuário", error });
+  }
+},
 
   async listUser(req, res) {
     try {
@@ -68,18 +117,17 @@ module.exports = {
 
   async getProfile(req, res) {
     try {
-      const user = await User.findByPk(req.userId, {
-        attributes: { exclude: ['password'] }
-      });
+      const user = await User.findByPk(req.user.id);
 
       if (!user) {
-        return res.status(404).json({ error: 'Usuário não encontrado' });
+        return res.status(404).json({ error: "Usuário não encontrado" });
       }
 
-      return res.json(user);
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ error: 'Erro ao buscar perfil' });
+      const { password, ...userData } = user.toJSON();
+      res.json(userData);
+    } catch (error) {
+      console.error("Erro ao buscar perfil:", error);
+      res.status(500).json({ error: "Erro ao buscar perfil do usuário" });
     }
   },
 
@@ -102,7 +150,8 @@ module.exports = {
       await registerLog({
         name: user.name,
         activityType: "Atualização de permissões",
-        module: "Admin - Clientes"
+        module: "Admin - Clientes",
+        userId: user.id,
       });
 
       const { password: _, ...userData } = user.toJSON();

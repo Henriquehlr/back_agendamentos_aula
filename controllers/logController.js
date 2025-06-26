@@ -11,10 +11,19 @@ exports.getAllLogs = async (req, res) => {
 
 exports.createLog = async (req, res) => {
   try {
-    const { name, activityType, module, datetime } = req.body;
-    const novoLog = await Log.create({ name, activityType, module, datetime });
+    const { name, activityType, module, datetime, userId } = req.body;
+
+    const novoLog = await Log.create({
+      name,
+      activityType,
+      module,
+      datetime,
+      userId, 
+    });
+
     res.status(201).json(novoLog);
   } catch (error) {
     res.status(500).json({ message: 'Erro ao criar log', error });
   }
 };
+

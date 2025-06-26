@@ -3,8 +3,8 @@ const registerLog = require('../utils/registerLog');
 
 module.exports = {
   async createBooking(req, res) {
-    const { room, date, startTime, endTime } = req.body;
     const userId = req.user.id;
+    const { room, date, startTime, endTime } = req.body;
 
     try {
       const booking = await Booking.create({
@@ -12,7 +12,7 @@ module.exports = {
         date,
         startTime,
         endTime,
-        userId,
+        userId
       });
 
       const user = await User.findByPk(userId);
@@ -20,7 +20,8 @@ module.exports = {
       await registerLog({
         name: user.name,
         activityType: "Criação de agendamento",
-        module: "Agendamentos"
+        module: "Agendamentos",
+        userId: user.id,
       });
 
       return res.status(201).json(booking);
@@ -55,7 +56,8 @@ module.exports = {
       await registerLog({
         name: booking.user.name,
         activityType: "Aprovação de agendamento",
-        module: "Agendamentos"
+        module: "Agendamentos",
+        userId: req.user.id,
       });
 
       return res.json({ message: 'Agendamento aprovado com sucesso', booking });
@@ -80,7 +82,8 @@ module.exports = {
       await registerLog({
         name: booking.user.name,
         activityType: "Cancelamento de agendamento",
-        module: "Agendamentos"
+        module: "Agendamentos",
+        userId: req.user.id,
       });
 
       return res.json({ message: 'Agendamento cancelado com sucesso', booking });
