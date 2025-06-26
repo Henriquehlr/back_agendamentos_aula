@@ -14,13 +14,15 @@ exports.listRooms = async (req, res) => {
 exports.createRoom = async (req, res) => {
   try {
     const { name, scheduleTime, timeBlock, date } = req.body;
+     const userId = req.user?.id || 0;
 
     const room = await Room.create({ name, scheduleTime, timeBlock, date });
-
+console.log("                                 Matheusdobrega@email.com",  userId)
     await registerLog({
       name: "Admin",
       activityType: `Criação da sala ${name}`,
-      module: "Admin - Salas"
+      module: "Admin - Salas",
+      userId: userId,
     });
 
     res.status(201).json(room);
@@ -45,7 +47,8 @@ exports.updateRoom = async (req, res) => {
     await registerLog({
       name: "Admin",
       activityType: `Atualização da sala ${name}`,
-      module: "Admin - Salas"
+      module: "Admin - Salas",
+      userId: req.user.id,
     });
 
     res.json(room);
