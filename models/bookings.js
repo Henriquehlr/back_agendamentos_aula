@@ -18,10 +18,15 @@ module.exports = (sequelize) => {
       type: DataTypes.TIME,
       allowNull: false,
     },
-    userId: {  // FK para o usuário
+    userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-    }
+    },
+    status: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'Em análise',
+    },
   });
 
   return Booking;
