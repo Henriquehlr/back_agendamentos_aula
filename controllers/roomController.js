@@ -1,4 +1,5 @@
 const { Room } = require("../models");
+const registerLog = require("../utils/registerLog");
 
 exports.listRooms = async (req, res) => {
   try {
@@ -15,6 +16,13 @@ exports.createRoom = async (req, res) => {
     const { name, scheduleTime, timeBlock, date } = req.body;
 
     const room = await Room.create({ name, scheduleTime, timeBlock, date });
+
+    await registerLog({
+      name: "Admin",
+      activityType: `Criação da sala ${name}`,
+      module: "Admin - Salas"
+    });
+
     res.status(201).json(room);
   } catch (error) {
     console.error("Error creating room:", error);
@@ -33,6 +41,13 @@ exports.updateRoom = async (req, res) => {
     }
 
     await room.update({ name, scheduleTime, timeBlock, date });
+
+    await registerLog({
+      name: "Admin",
+      activityType: `Atualização da sala ${name}`,
+      module: "Admin - Salas"
+    });
+
     res.json(room);
   } catch (error) {
     console.error("Error updating room:", error);
