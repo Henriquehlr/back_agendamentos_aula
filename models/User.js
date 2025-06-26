@@ -1,29 +1,24 @@
-const { DataTypes } = require('sequelize'); // Tipos do Sequelize (string, boolean, json, etc.)
-const bcrypt = require('bcryptjs'); // Lib para hash seguro de senhas
+const { DataTypes } = require('sequelize');
+const bcrypt = require('bcryptjs'); 
 
 module.exports = (sequelize) => {
-  // Define o modelo 'User' (tabela 'users' no banco de dados)
   const User = sequelize.define('User', {
-    // Nome do usuário
     name: {
       type: DataTypes.STRING,
       allowNull: false
     },
-    // Email único e obrigatório
     email: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
       validate: {
-        isEmail: true // Verifica formato de email válido
+        isEmail: true 
       }
     },
-    // Senha (será armazenada com hash)
     password: {
       type: DataTypes.STRING,
       allowNull: false
     },
-    // Endereço: CEP, estado, cidade, bairro, rua, número e complemento
     cep: {
       type: DataTypes.STRING(9),
       allowNull: false
@@ -50,21 +45,19 @@ module.exports = (sequelize) => {
     },
     complement: {
       type: DataTypes.STRING,
-      allowNull: true // Campo opcional
+      allowNull: true 
     },
-    // Papel do usuário (cliente ou admin)
+
     role: {
       type: DataTypes.ENUM('client', 'admin'),
       allowNull: false,
       defaultValue: 'client'
     },
-    // Permissões do usuário (Agendamentos, Logs)
     permissions: {
-      type: DataTypes.JSON,
-      allowNull: false,
-      defaultValue: ['Agendamentos'], // Permissão padrão
+      type: DataTypes.JSON, 
+      allowNull: true,
+      defaultValue: [],
       validate: {
-        // Valida que todas permissões são válidas
         isValidPermissions(value) {
           const valid = ['Agendamentos', 'Logs'];
           if (!Array.isArray(value)) {
@@ -78,7 +71,6 @@ module.exports = (sequelize) => {
         }
       }
     },
-    // Status ativo/inativo do usuário
     status: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
@@ -87,13 +79,12 @@ module.exports = (sequelize) => {
   }, {
     tableName: 'users',
     hooks: {
-      // Antes de criar o usuário, faz o hash da senha
       beforeCreate: async (user) => {
-        const salt = await bcrypt.genSalt(10); // Gera salt aleatório
-        user.password = await bcrypt.hash(user.password, salt); // Aplica hash
+        const salt = await bcrypt.genSalt(10); 
+        user.password = await bcrypt.hash(user.password, salt); 
       }
     }
   });
 
-  return User; // Exporta o modelo para ser usado no app
+  return User;
 };

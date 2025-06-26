@@ -6,12 +6,13 @@ const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes'); 
 const bookingRoutes = require('./routes/bookingRoutes');
 const roomRoutes = require('./routes/roomRoutes');
+const logRoutes = require('./routes/logRoutes');
 
 require('dotenv').config();
 
 app.use(cors({
   origin: 'http://localhost:3001',
-  credentials: true // se usar cookies ou headers personalizados
+  credentials: true 
 }));
 
 app.use(express.json());
@@ -21,6 +22,7 @@ app.use('/users', userRoutes);
 app.use('/auth', authRoutes); 
 app.use('/bookings', bookingRoutes);
 app.use('/rooms', roomRoutes);
+app.use('/logs', logRoutes);
 
 // Conexão e sincronização com banco
 sequelize.authenticate()

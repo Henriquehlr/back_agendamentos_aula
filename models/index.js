@@ -1,7 +1,9 @@
 const { Sequelize } = require("sequelize"); 
+const { DataTypes } = require("sequelize");
 const UserModel = require("./User"); 
 const BookingModel = require('./bookings');
 const RoomModel = require('./room'); 
+const LogModel = require("./log");
 
 require('dotenv').config(); 
 
@@ -20,9 +22,12 @@ const sequelize = new Sequelize(
 const User = UserModel(sequelize);
 const Booking = BookingModel(sequelize);
 const Room = RoomModel(sequelize);
+const Log = LogModel(sequelize, DataTypes);
 
+// Relações
 Booking.belongsTo(User, { as: 'user', foreignKey: 'userId' });
 User.hasMany(Booking, { as: 'bookings', foreignKey: 'userId' });
+
 // Sincroniza os modelos com o banco, criando as tabelas caso não existam
 sequelize.sync();
 
@@ -31,4 +36,5 @@ module.exports = {
   User,  
   Booking,
   Room, 
+  Log
 };

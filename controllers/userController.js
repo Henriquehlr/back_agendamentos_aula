@@ -1,8 +1,8 @@
 const axios = require('axios');
 const { User } = require('../models');
+const registerLog = require('../utils/registerLog');
 
 module.exports = {
-  // Criação de usuário
   async createUser(req, res) {
     try {
       const {
@@ -12,21 +12,18 @@ module.exports = {
         cep,
         number,
         complement,
-        permissions, // novo campo: permissões do usuário (array)
-        status       // novo campo: status ativo/inativo (boolean)
+        permissions,
+        status
       } = req.body;
 
-      // Consulta o endereço via API do ViaCEP
       const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
 
       if (response.data.erro) {
         return res.status(400).json({ error: 'CEP inválido' });
       }
 
-      // Desestruturação dos dados retornados pelo ViaCEP
       const { uf, localidade, bairro, logradouro } = response.data;
 
-      // Criação do usuário no banco
       const user = await User.create({
         name,
         email,
@@ -38,12 +35,17 @@ module.exports = {
         street: logradouro,
         number,
         complement,
-        permissions, // salva as permissões
-        status       // salva o status
+        permissions,
+        status
       });
 
-      // Remove o campo "password" da resposta
       const { password: _, ...userData } = user.toJSON();
+
+      await registerLog({
+        name,
+        activityType: "Cadastro de usuário",
+        module: "Admin - Clientes"
+      });
 
       return res.status(201).json(userData);
     } catch (err) {
@@ -52,11 +54,10 @@ module.exports = {
     }
   },
 
-  // Listar todos os usuários
   async listUser(req, res) {
     try {
       const users = await User.findAll({
-        attributes: { exclude: ['password'] } // exclui a senha da resposta
+        attributes: { exclude: ['password'] }
       });
       return res.json(users);
     } catch (err) {
@@ -65,7 +66,6 @@ module.exports = {
     }
   },
 
-  // Retornar o perfil do usuário autenticado
   async getProfile(req, res) {
     try {
       const user = await User.findByPk(req.userId, {
@@ -80,6 +80,36 @@ module.exports = {
     } catch (err) {
       console.error(err);
       return res.status(500).json({ error: 'Erro ao buscar perfil' });
+    }
+  },
+
+  async updatePermissions(req, res) {
+    const { id } = req.params;
+    const { permissions } = req.body;
+
+    if (!Array.isArray(permissions)) {
+      return res.status(400).json({ message: "Permissões devem ser um array." });
+    }
+
+    try {
+      const user = await User.findByPk(id);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado." });
+      }
+
+      await user.update({ permissions });
+
+      await registerLog({
+        name: user.name,
+        activityType: "Atualização de permissões",
+        module: "Admin - Clientes"
+      });
+
+      const { password: _, ...userData } = user.toJSON();
+      return res.status(200).json({ message: "Permissões atualizadas com sucesso.", user: userData });
+    } catch (error) {
+      console.error("Erro ao atualizar permissões:", error);
+      return res.status(500).json({ message: "Erro interno ao atualizar permissões." });
     }
   }
 };
