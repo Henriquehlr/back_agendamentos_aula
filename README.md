@@ -67,7 +67,7 @@ API RESTful desenvolvida em **Node.js** com **Express**, utilizando **Sequelize*
 1. Clone o repositório:
 
 ```bash
-git clone https://github.com/seu-usuario/agenda-salas-backend.git
+git clone https://github.com/Henriquehlr/back_agendamentos_aula
 cd agenda-salas-backend
 ```
 
